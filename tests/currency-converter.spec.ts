@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { getRandomNumber } from '../utils/randomUtils';
+import { getRandomNumber, extractExchangeRate } from '../utils/numberUtils';
 import { ConverterPage } from '../page-object/converter-page';
 
 test.describe('Currency converter', () => {
@@ -28,44 +28,57 @@ test.describe('Currency converter', () => {
         await expect(converter.createQuoteButton).toBeEnabled();
     });
 
-    test('should display correct exchange rate in to field', async ({ page }) => {
+    test.only('should display correct exchange rate in to field', async ({ page }) => {
         const converter = new ConverterPage(page);
         const valueToConvert = String(getRandomNumber(50, 25000));
 
-        await converter.selectCurrencyFrom('Euro flag EUR')
-        await converter.selectCurrencyTo('USA flag USD')
-        await converter.enterFromAmount(valueToConvert)
+        await converter.setupCurrencies('Euro flag EUR', 'USA flag USD');
+        await converter.enterFromAmount(valueToConvert);
 
-        const exchangeRateValue = converter.getExchangeRateValue();
-        const expectedQuote = Number(valueToConvert) * await exchangeRateValue;
-        expect(Number(converter.getToInputValue)).toBe(expectedQuote);
+        const exchangeRate = await converter.getExchangeRateLabelContent();
+        const exchangeRateValue = extractExchangeRate(exchangeRate);
+        const toInputValue = await converter.getToInputValue();
+
+        const expectedQuote = Number(valueToConvert) * Number(exchangeRateValue);
+
+        expect(Number(toInputValue)).toBeCloseTo(expectedQuote);
     });
 
-    test('should display correct exchange rate in from field', async ({ page }) => {
+    test.only('should display correct exchange rate in from field', async ({ page }) => {
         const converter = new ConverterPage(page);
-        const valueToConvert = String(getRandomNumber(50, 25000));
+        const valueToConvert = getRandomNumber(50, 25000);
 
-        await converter.selectCurrencyFrom('Euro flag EUR')
-        await converter.selectCurrencyTo('USA flag USD')
-        await converter.enterToAmount(valueToConvert)
+        await converter.setupCurrencies('Euro flag EUR', 'USA flag USD');
+        await converter.enterToAmount(String(valueToConvert));
 
-        const exchangeRateValue = converter.getExchangeRateValue();
-        const expectedQuote = Number(valueToConvert) / await exchangeRateValue;
-        expect(Number(converter.getFromInputValue)).toBe(expectedQuote);
+        const exchangeRate = await converter.getExchangeRateLabelContent();
+        const exchangeRateValue = extractExchangeRate(exchangeRate);
+        const fromInputValue = await converter.getFromInputValue();
+
+
+        if (exchangeRateValue !== null) {
+            const expectedQuote = valueToConvert / exchangeRateValue;
+            expect(Number(fromInputValue)).toBeCloseTo(expectedQuote);
+        } else {
+            throw new Error('Failed to extract a valid exchange rate from the exchange rate string.');
+        }
     });
 
-    test.only('should swap currencies correctly when swap button is clicked', async ({ page }) => {
+    test('should swap currencies correctly when swap button is clicked', async ({ page }) => {
         const converter = new ConverterPage(page);
-        
-        const expectedFromDefaultCurrency = "$USD";
-        const expectedToDefaultCurrency = "$MXN";
+        const expectedFromCurrency = "USD";
+        const expectedToCurrency = "MXN";
+        const valueToConvert = getRandomNumber(50, 25000);
 
-        await expect(converter.fromCurrencyWrapper).toHaveText(expectedFromDefaultCurrency);
-        await expect(converter.toCurrencyWrapper).toHaveText(expectedToDefaultCurrency);
+        await converter.setupCurrencies('USA flag USD', 'Mexico flag MXN')
+        await converter.enterToAmount(String(valueToConvert));
+
+        await expect(converter.fromCurrencyWrapper).toContainText(expectedFromCurrency);
+        await expect(converter.toCurrencyWrapper).toContainText(expectedToCurrency);
 
         await converter.clickInvertButton();
 
-        await expect(converter.fromCurrencyWrapper).toHaveText(expectedToDefaultCurrency);
-        await expect(converter.toCurrencyWrapper).toHaveText(expectedFromDefaultCurrency);
+        await expect(converter.fromCurrencyWrapper).toContainText(expectedToCurrency);
+        await expect(converter.toCurrencyWrapper).toContainText(expectedFromCurrency);
     })
 });

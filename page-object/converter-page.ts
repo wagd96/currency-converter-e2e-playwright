@@ -27,13 +27,12 @@ export class ConverterPage extends BasePage {
 
         this.toCurrencyWrapper = page.getByTestId('currency-wrapper-to');
         this.toCurrencyInput = page.getByTestId('currency-input-to');
-        this.toCurrencyOptions = this.toCurrencyWrapper.locator('svg');
+        this.toCurrencyOptions = page.getByTestId('currency-wrapper-to').locator('svg');
 
         this.invertButton = page.getByRole('button', { name: 'Invertir orden' });
         this.exchangeRateLabel = page.getByTestId('exchange-rate');
         this.createQuoteButton = page.getByRole('button', { name: 'Realizar conversión' });
     }
-
 
     async selectCurrencyFrom(currency: string) {
         await this.fromCurrencyOptions.click();
@@ -62,19 +61,19 @@ export class ConverterPage extends BasePage {
     }
 
     async getFromInputValue(): Promise<string>{
-        return this.fromCurrencyInput.inputValue();
+        return await this.fromCurrencyInput.inputValue();
     }
 
     async getToInputValue(): Promise<string>{
-        return this.toCurrencyInput.inputValue();
+        return await this.toCurrencyInput.inputValue();
     }
 
     async getExchangeRateLabelContent(): Promise<string> {
-        return this.exchangeRateLabel.innerText();
+        return await this.exchangeRateLabel.innerText();
     }
 
-    async getExchangeRateValue():Promise<number>{
-        let str = await this.getExchangeRateLabelContent();
-        return Number(str.match(/(\d+)/));
+    async setupCurrencies(from: string, to: string){
+        await this.selectCurrencyFrom(from);
+        await this.selectCurrencyTo(to);
     }
 }
