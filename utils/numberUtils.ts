@@ -9,14 +9,19 @@ export function getRandomNumber(min: number, max: number): number {
 }
 
 export function extractExchangeRate(rateString) {
+    if (!rateString || typeof rateString !== 'string') {
+        throw new Error('Invalid input: rateString must be a non-empty string');
+    }
+
     const regex = /=\s*\$?\s*(\d+(\.\d+)?)/;
     const match = rateString.match(regex);
 
     if (match) {
         const rate = Number(match[1]);
-        if (!isNaN(rate)) {
+        if (!isNaN(rate) && rate > 0) {
             return rate;
         }
     }
-    return null;
+    
+    throw new Error('Failed to extract a valid exchange rate');
 }

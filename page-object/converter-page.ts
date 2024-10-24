@@ -1,5 +1,7 @@
 import { Locator, Page } from "@playwright/test";
+import { extractExchangeRate } from '../utils/numberUtils';
 import BasePage from "./BasePage";
+
 
 export class ConverterPage extends BasePage {
     readonly path: string = "/";
@@ -16,6 +18,8 @@ export class ConverterPage extends BasePage {
     readonly invertButton: Locator;
     readonly exchangeRateLabel: Locator;
     readonly createQuoteButton: Locator;
+    readonly historyTable: Locator;
+    readonly historyResults: Locator;
 
     constructor(page: Page) {
         super(page);
@@ -32,6 +36,9 @@ export class ConverterPage extends BasePage {
         this.invertButton = page.getByRole('button', { name: 'Invertir orden' });
         this.exchangeRateLabel = page.getByTestId('exchange-rate');
         this.createQuoteButton = page.getByRole('button', { name: 'Realizar conversión' });
+
+        this.historyTable = page.getByRole('table');
+        this.historyResults = this.historyTable.locator('tbody');
     }
 
     async selectCurrencyFrom(currency: string) {
@@ -60,11 +67,11 @@ export class ConverterPage extends BasePage {
         await this.createQuoteButton.click();
     }
 
-    async getFromInputValue(): Promise<string>{
+    async getFromInputValue(): Promise<string> {
         return await this.fromCurrencyInput.inputValue();
     }
 
-    async getToInputValue(): Promise<string>{
+    async getToInputValue(): Promise<string> {
         return await this.toCurrencyInput.inputValue();
     }
 
@@ -72,8 +79,29 @@ export class ConverterPage extends BasePage {
         return await this.exchangeRateLabel.innerText();
     }
 
-    async setupCurrencies(from: string, to: string){
+    async getExchangeRateValue(): Promise<number>{
+        const exchangeRate = await this.getExchangeRateLabelContent();
+        return extractExchangeRate(exchangeRate);
+    }
+
+    async setupCurrencies(from: string, to: string) {
         await this.selectCurrencyFrom(from);
         await this.selectCurrencyTo(to);
+    }
+
+    async getAllHistoryResults() {
+        return await this.historyResults.locator('tr').all();
+    }
+
+    async getFirstHistoryResult() {
+        return this.historyResults.locator('tr').first().locator('td').all();
+    }
+
+    async getLastHistoryResult() {
+        return this.historyResults.locator('tr').last().locator('td').all();
+    }
+
+    async getSpecificHistoryResult(rowId: number) {
+        return this.historyResults.locator('tr').nth(rowId).locator('td').all();
     }
 }
