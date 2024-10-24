@@ -25,4 +25,8 @@ export default abstract class BasePage {
   async clickElementByLabel(label) {
     await this.page.getByLabel(label).click();
   }
+
+  async clickElementByRole(role, options) {
+    await this.page.getByRole(role, options).click();
+  }
 }
