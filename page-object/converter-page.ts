@@ -4,8 +4,10 @@ import BasePage from "./BasePage";
 export class ConverterPage extends BasePage {
     readonly path: string = "/";
 
+    readonly fromCurrencyWrapper: Locator;
     readonly fromCurrencyInput: Locator;
     readonly fromCurrencyOptions: Locator;
+    readonly toCurrencyWrapper: Locator;
     readonly toCurrencyInput: Locator;
     readonly toCurrencyOptions: Locator;
     readonly currencyMxnOption: Locator;
@@ -19,10 +21,14 @@ export class ConverterPage extends BasePage {
         super(page);
         super.setPath(this.path);
 
+        this.fromCurrencyWrapper = page.getByTestId('currency-wrapper-from');
         this.fromCurrencyInput = page.getByTestId('currency-input-from');
-        this.fromCurrencyOptions = page.getByTestId('currency-wrapper-from').locator('svg');
+        this.fromCurrencyOptions = this.fromCurrencyWrapper.locator('svg');
+
+        this.toCurrencyWrapper = page.getByTestId('currency-wrapper-to');
         this.toCurrencyInput = page.getByTestId('currency-input-to');
-        this.toCurrencyOptions = page.getByTestId('currency-wrapper-to').locator('svg');
+        this.toCurrencyOptions = this.toCurrencyWrapper.locator('svg');
+
         this.invertButton = page.getByRole('button', { name: 'Invertir orden' });
         this.exchangeRateLabel = page.getByTestId('exchange-rate');
         this.createQuoteButton = page.getByRole('button', { name: 'Realizar conversión' });
@@ -71,5 +77,4 @@ export class ConverterPage extends BasePage {
         let str = await this.getExchangeRateLabelContent();
         return Number(str.match(/(\d+)/));
     }
-
 }

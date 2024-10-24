@@ -10,7 +10,7 @@ test.describe('Currency converter', () => {
         await page.goto(url);
     });
 
-    test('Quote button should be enabled only when from amount is entered', async ({ page }) => {
+    test('should enable quote button when amount is entered in from field', async ({ page }) => {
         const converter = new ConverterPage(page);
         const valueToConvert = String(getRandomNumber(50, 25000));
 
@@ -19,7 +19,7 @@ test.describe('Currency converter', () => {
         await expect(converter.createQuoteButton).toBeEnabled();
     });
 
-    test('Quote button should be enabled only when to amount is entered', async ({ page }) => {
+    test('should enable quote button when amount is entered in to field', async ({ page }) => {
         const converter = new ConverterPage(page);
         const valueToConvert = String(getRandomNumber(50, 25000));
 
@@ -28,7 +28,7 @@ test.describe('Currency converter', () => {
         await expect(converter.createQuoteButton).toBeEnabled();
     });
 
-    test('Exchange rate in to input field  should be correct', async ({ page }) => {
+    test('should display correct exchange rate in to field', async ({ page }) => {
         const converter = new ConverterPage(page);
         const valueToConvert = String(getRandomNumber(50, 25000));
 
@@ -41,7 +41,7 @@ test.describe('Currency converter', () => {
         expect(Number(converter.getToInputValue)).toBe(expectedQuote);
     });
 
-    test('Exchange rate in from input field  should be correct', async ({ page }) => {
+    test('should display correct exchange rate in from field', async ({ page }) => {
         const converter = new ConverterPage(page);
         const valueToConvert = String(getRandomNumber(50, 25000));
 
@@ -54,4 +54,18 @@ test.describe('Currency converter', () => {
         expect(Number(converter.getFromInputValue)).toBe(expectedQuote);
     });
 
+    test.only('should swap currencies correctly when swap button is clicked', async ({ page }) => {
+        const converter = new ConverterPage(page);
+        
+        const expectedFromDefaultCurrency = "$USD";
+        const expectedToDefaultCurrency = "$MXN";
+
+        await expect(converter.fromCurrencyWrapper).toHaveText(expectedFromDefaultCurrency);
+        await expect(converter.toCurrencyWrapper).toHaveText(expectedToDefaultCurrency);
+
+        await converter.clickInvertButton();
+
+        await expect(converter.fromCurrencyWrapper).toHaveText(expectedToDefaultCurrency);
+        await expect(converter.toCurrencyWrapper).toHaveText(expectedFromDefaultCurrency);
+    })
 });
