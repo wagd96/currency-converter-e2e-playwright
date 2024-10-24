@@ -1,7 +1,7 @@
 import { Locator, Page } from "@playwright/test";
 import BasePage from "./BasePage";
 
-export class Converter extends BasePage {
+export class ConverterPage extends BasePage {
     readonly path: string = "/";
 
     readonly currencyFromInput: Locator;
