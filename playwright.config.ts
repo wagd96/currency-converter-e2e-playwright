@@ -9,18 +9,19 @@ export default defineConfig({
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : 1,
+  workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [['html',{open: 'never' }]],
-  timeout: 5000,
+  timeout: 60000,
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    // baseURL: 'http://127.0.0.1:3000',
+    //baseURL: 'https://efex.vercel.app',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
+    video: 'retain-on-failure' ,
     trace: 'retain-on-failure',
     launchOptions:{
-      //slowMo: 1000
+      //slowMo: 10
     }  
   },
   
